@@ -269,6 +269,7 @@ class Crawler:
 		is_clickable = set(nodes["isClickable"]["index"])
 
 		text_value 			= nodes["textValue"]
+		print("text_value: ", text_value)
 		text_value_index 	= text_value["index"]
 		text_value_values 	= text_value["value"]
 
@@ -293,6 +294,7 @@ class Crawler:
 
 		def convert_name(node_name, has_click_handler):
 			if node_name == "a":
+				print("Has Link")
 				return "link"
 			if node_name == "input":
 				print("Has Input")
@@ -596,7 +598,7 @@ if (
 
 	gpt_cmd = ""
 	prev_cmd = ""
-	_crawler.go_to_page("google.com/search?q=" + objective)
+	_crawler.go_to_page("google.com")
 	try:
 		while True:
 			browser_content = "\n".join(_crawler.crawl())
