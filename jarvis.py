@@ -1,9 +1,6 @@
-#!/usr/bin/env python3
-#
-# natbot.py
-#
+
 # Set OPENAI_API_KEY to your API key, and then run this from a terminal.
-#
+
 
 from playwright.sync_api import sync_playwright
 import time
@@ -201,10 +198,11 @@ class Crawler:
 		self.page.evaluate(js)
 
 		element = self.page_element_buffer.get(int(id))
+		print("Element: ", element)
 		if element:
 			x = element.get("center_x")
 			y = element.get("center_y")
-			
+			print(f"Clicking at {x}, {y}")
 			self.page.mouse.click(x, y)
 		else:
 			print("Could not find element")
@@ -275,6 +273,7 @@ class Crawler:
 		text_value_values 	= text_value["value"]
 
 		input_value 		= nodes["inputValue"]
+		print("input_value: ", input_value)
 		input_value_index 	= input_value["index"]
 		input_value_values 	= input_value["value"]
 
@@ -296,6 +295,7 @@ class Crawler:
 			if node_name == "a":
 				return "link"
 			if node_name == "input":
+				print("Has Input")
 				return "input"
 			if node_name == "img":
 				return "img"
@@ -559,7 +559,7 @@ if (
 		prompt = prompt.replace("$url", url[:100])
 		prompt = prompt.replace("$previous_command", previous_command)
 		prompt = prompt.replace("$browser_content", browser_content[:4500])
-		response = openai.Completion.create(model="text-davinci-002", prompt=prompt, temperature=0.5, best_of=10, n=3, max_tokens=50)
+		response = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=0.5, best_of=10, n=3, max_tokens=50)
 		return response.choices[0].text
 
 	def run_cmd(cmd):
@@ -574,8 +574,9 @@ if (
 			id = commasplit[0].split(" ")[1]
 			_crawler.click(id)
 		elif cmd.startswith("TYPE"):
+			print("CMD is type " + cmd)
 			spacesplit = cmd.split(" ")
-			id = spacesplit[1]
+			id = spacesplit[1] #4
 			text = spacesplit[2:]
 			text = " ".join(text)
 			# Strip leading and trailing double quotes
@@ -588,14 +589,14 @@ if (
 		time.sleep(2)
 
 	objective = "Make a reservation for 2 at 7pm at bistro vida in menlo park"
-	print("\nWelcome to natbot! What is your objective?")
+	print("\nWelcome to WingsGPT! What is your objective?")
 	i = input()
 	if len(i) > 0:
 		objective = i
 
 	gpt_cmd = ""
 	prev_cmd = ""
-	_crawler.go_to_page("google.com")
+	_crawler.go_to_page("google.com/search?q=" + objective)
 	try:
 		while True:
 			browser_content = "\n".join(_crawler.crawl())
@@ -604,15 +605,17 @@ if (
 			gpt_cmd = gpt_cmd.strip()
 
 			if not quiet:
+				print("Test....")
 				print("URL: " + _crawler.page.url)
 				print("Objective: " + objective)
 				print("----------------\n" + browser_content + "\n----------------\n")
 			if len(gpt_cmd) > 0:
-				print("Suggested command: " + gpt_cmd)
+				print("Suggested command is .... : " + gpt_cmd)
 
 
 			command = input()
 			if command == "r" or command == "":
+				print("Running command r: " + gpt_cmd)
 				run_cmd(gpt_cmd)
 			elif command == "g":
 				url = input("URL:")
@@ -626,7 +629,8 @@ if (
 			elif command == "c":
 				id = input("id:")
 				_crawler.click(id)
-				time.sleep(1)
+				print(f"Clicked {id} Wait 10 seconds for page to load")
+				time.sleep(10)
 			elif command == "t":
 				id = input("id:")
 				text = input("text:")
